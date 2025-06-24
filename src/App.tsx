@@ -87,10 +87,10 @@ const App = () => {
     switch (rotation) {
       case 0: // ⊤
         return [
-          [row, col],
           [row + 1, col],
-          [row + 1, col - 1],
-          [row + 1, col + 1]
+          [row, col],
+          [row, col - 1],
+          [row, col + 1]
         ];
       case 90: // ⊣
         return [
@@ -101,10 +101,10 @@ const App = () => {
         ];
       case 180: // ⊥
         return [
-          [row + 1, col],
           [row, col],
-          [row, col - 1],
-          [row, col + 1]
+          [row + 1, col],
+          [row + 1, col - 1],
+          [row + 1, col + 1]
         ];
       case 270: // ⊢
         return [
