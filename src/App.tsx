@@ -19,15 +19,16 @@ const Container = styled.div`
   overflow-x: hidden;
 `;
 
-const GameBoard = styled.div`
+const GameBoard = styled.div<{ size: number }>`
   display: grid;
-  grid-template-columns: repeat(8, minmax(30px, 50px));
+  grid-template-columns: repeat(${props => props.size}, minmax(30px, 50px));
   gap: 2px;
   background-color: #333;
   padding: 10px;
   border-radius: 8px;
   width: fit-content;
   max-width: 95vw;
+  margin: 10px 0;
 `;
 
 const Cell = styled.div<{ isOccupied: boolean }>`
@@ -102,11 +103,39 @@ const Title = styled.h1`
   }
 `;
 
-const App = () => {
+const Divider = styled.div`
+  width: 80%;
+  height: 2px;
+  background-color: #bdc3c7;
+  margin: 20px 0;
+`;
+
+const PasswordInput = styled.input`
+  padding: 8px;
+  font-size: 16px;
+  border: 2px solid #bdc3c7;
+  border-radius: 4px;
+  width: 120px;
+  text-align: center;
+  margin: 10px;
+
+  &:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+`;
+
+const ErrorMessage = styled.p`
+  color: #e74c3c;
+  margin: 5px 0;
+  font-size: 14px;
+`;
+
+const PuzzleGame = ({ size }: { size: number }) => {
   const [grid, setGrid] = useState<Grid>(() => 
-    Array(8).fill(null).map(() => Array(8).fill(null))
+    Array(size).fill(null).map(() => Array(size).fill(null))
   );
-  const [history, setHistory] = useState<Grid[]>([Array(8).fill(null).map(() => Array(8).fill(null))]);
+  const [history, setHistory] = useState<Grid[]>([Array(size).fill(null).map(() => Array(size).fill(null))]);
   const [currentStep, setCurrentStep] = useState(0);
   const [currentRotation, setCurrentRotation] = useState<Rotation>(0);
 
@@ -145,10 +174,8 @@ const App = () => {
 
   const isValidPlacement = (row: number, col: number, rotation: Rotation): boolean => {
     const cells = getTetrominoCells(row, col, rotation);
-    
-    // Check if all required cells are within bounds and empty
     return cells.every(([r, c]) => {
-      return r >= 0 && r < 8 && c >= 0 && c < 8 && !grid[r][c];
+      return r >= 0 && r < size && c >= 0 && c < size && !grid[r][c];
     });
   };
 
@@ -185,7 +212,7 @@ const App = () => {
   };
 
   const reset = () => {
-    const emptyGrid = Array(8).fill(null).map(() => Array(8).fill(null));
+    const emptyGrid = Array(size).fill(null).map(() => Array(size).fill(null));
     setGrid(emptyGrid);
     setHistory([emptyGrid]);
     setCurrentStep(0);
@@ -196,8 +223,8 @@ const App = () => {
   };
 
   return (
-    <Container>
-      <Title>T-Tetromino Puzzle</Title>
+    <>
+      <Title>{size}x{size} T-Tetromino Puzzle</Title>
       <RotationControls>
         <Button 
           onClick={() => rotateShape(0)} 
@@ -224,7 +251,7 @@ const App = () => {
           Rotation 270° (⊢)
         </Button>
       </RotationControls>
-      <GameBoard>
+      <GameBoard size={size}>
         {grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
             <Cell
@@ -246,6 +273,48 @@ const App = () => {
           Reset
         </Button>
       </ButtonContainer>
+    </>
+  );
+};
+
+const App = () => {
+  const [password, setPassword] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [error, setError] = useState('');
+
+  const handlePasswordSubmit = () => {
+    if (password === '1618') {
+      setIsUnlocked(true);
+      setError('');
+    } else {
+      setError('Incorrect password');
+    }
+  };
+
+  return (
+    <Container>
+      <PuzzleGame size={8} />
+      <Divider />
+      {!isUnlocked ? (
+        <>
+          <Title>Enter Password to Unlock 6x6 Puzzle</Title>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <PasswordInput
+              type="password"
+              maxLength={4}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="****"
+            />
+            <Button onClick={handlePasswordSubmit}>
+              Unlock
+            </Button>
+          </div>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+        </>
+      ) : (
+        <PuzzleGame size={6} />
+      )}
     </Container>
   );
 };
