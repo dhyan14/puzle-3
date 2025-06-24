@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 // Types
 type Cell = null | 'T';
 type Grid = Cell[][];
-type Move = { row: number; col: number };
+type Rotation = 0 | 90 | 180 | 270;
 
 // Styled Components
 const Container = styled.div`
@@ -63,6 +63,16 @@ const ButtonContainer = styled.div`
   display: flex;
   gap: 10px;
   margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const RotationControls = styled.div`
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  justify-content: center;
 `;
 
 const App = () => {
@@ -71,29 +81,59 @@ const App = () => {
   );
   const [history, setHistory] = useState<Grid[]>([Array(8).fill(null).map(() => Array(8).fill(null))]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [currentRotation, setCurrentRotation] = useState<Rotation>(0);
 
-  const isValidPlacement = (row: number, col: number): boolean => {
-    if (row < 0 || row >= 7 || col < 0 || col >= 8) return false;
+  const getTetrominoCells = (row: number, col: number, rotation: Rotation): [number, number][] => {
+    switch (rotation) {
+      case 0: // ⊤
+        return [
+          [row, col],
+          [row + 1, col],
+          [row + 1, col - 1],
+          [row + 1, col + 1]
+        ];
+      case 90: // ⊣
+        return [
+          [row, col],
+          [row - 1, col],
+          [row + 1, col],
+          [row, col - 1]
+        ];
+      case 180: // ⊥
+        return [
+          [row + 1, col],
+          [row, col],
+          [row, col - 1],
+          [row, col + 1]
+        ];
+      case 270: // ⊢
+        return [
+          [row, col],
+          [row - 1, col],
+          [row + 1, col],
+          [row, col + 1]
+        ];
+    }
+  };
+
+  const isValidPlacement = (row: number, col: number, rotation: Rotation): boolean => {
+    const cells = getTetrominoCells(row, col, rotation);
     
-    // Check if all cells for T-shape are empty
-    return (
-      !grid[row][col] &&
-      !grid[row + 1][col] &&
-      !grid[row + 1][col - 1] &&
-      !grid[row + 1][col + 1] &&
-      col > 0 &&
-      col < 7
-    );
+    // Check if all required cells are within bounds and empty
+    return cells.every(([r, c]) => {
+      return r >= 0 && r < 8 && c >= 0 && c < 8 && !grid[r][c];
+    });
   };
 
   const placeTetromino = (row: number, col: number) => {
-    if (!isValidPlacement(row, col)) return;
+    if (!isValidPlacement(row, col, currentRotation)) return;
 
     const newGrid = grid.map(row => [...row]);
-    newGrid[row][col] = 'T';
-    newGrid[row + 1][col] = 'T';
-    newGrid[row + 1][col - 1] = 'T';
-    newGrid[row + 1][col + 1] = 'T';
+    const cells = getTetrominoCells(row, col, currentRotation);
+    
+    cells.forEach(([r, c]) => {
+      newGrid[r][c] = 'T';
+    });
 
     const newHistory = history.slice(0, currentStep + 1);
     newHistory.push(newGrid);
@@ -124,9 +164,39 @@ const App = () => {
     setCurrentStep(0);
   };
 
+  const rotateShape = (rotation: Rotation) => {
+    setCurrentRotation(rotation);
+  };
+
   return (
     <Container>
       <h1>T-Tetromino Puzzle</h1>
+      <RotationControls>
+        <Button 
+          onClick={() => rotateShape(0)} 
+          style={{ backgroundColor: currentRotation === 0 ? '#2ecc71' : undefined }}
+        >
+          Rotation 0° (⊤)
+        </Button>
+        <Button 
+          onClick={() => rotateShape(90)} 
+          style={{ backgroundColor: currentRotation === 90 ? '#2ecc71' : undefined }}
+        >
+          Rotation 90° (⊣)
+        </Button>
+        <Button 
+          onClick={() => rotateShape(180)} 
+          style={{ backgroundColor: currentRotation === 180 ? '#2ecc71' : undefined }}
+        >
+          Rotation 180° (⊥)
+        </Button>
+        <Button 
+          onClick={() => rotateShape(270)} 
+          style={{ backgroundColor: currentRotation === 270 ? '#2ecc71' : undefined }}
+        >
+          Rotation 270° (⊢)
+        </Button>
+      </RotationControls>
       <GameBoard>
         {grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
@@ -153,4 +223,4 @@ const App = () => {
   );
 };
 
-export default App; 
+export default App;
