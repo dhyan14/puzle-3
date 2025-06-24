@@ -11,23 +11,28 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 10px;
   background-color: #f0f0f0;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 `;
 
 const GameBoard = styled.div`
   display: grid;
-  grid-template-columns: repeat(8, 50px);
+  grid-template-columns: repeat(8, minmax(30px, 50px));
   gap: 2px;
   background-color: #333;
   padding: 10px;
   border-radius: 8px;
+  width: fit-content;
+  max-width: 95vw;
 `;
 
 const Cell = styled.div<{ isOccupied: boolean }>`
-  width: 50px;
-  height: 50px;
+  width: minmax(30px, 50px);
+  aspect-ratio: 1;
   background-color: ${props => props.isOccupied ? '#9b59b6' : '#fff'};
   border-radius: 4px;
   cursor: pointer;
@@ -39,15 +44,21 @@ const Cell = styled.div<{ isOccupied: boolean }>`
 `;
 
 const Button = styled.button`
-  margin: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
+  margin: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
   border: none;
   border-radius: 4px;
   background-color: #3498db;
   color: white;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 
   &:hover {
     background-color: #2980b9;
@@ -61,18 +72,34 @@ const Button = styled.button`
 
 const ButtonContainer = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-top: 20px;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
+  max-width: 95vw;
+  padding: 0 10px;
 `;
 
 const RotationControls = styled.div`
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 8px;
+  margin: 15px 0;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
+  max-width: 95vw;
+  padding: 0 10px;
+`;
+
+const Title = styled.h1`
+  font-size: 24px;
+  margin: 10px 0;
+  text-align: center;
+  
+  @media (max-width: 480px) {
+    font-size: 20px;
+  }
 `;
 
 const App = () => {
@@ -170,7 +197,7 @@ const App = () => {
 
   return (
     <Container>
-      <h1>T-Tetromino Puzzle</h1>
+      <Title>T-Tetromino Puzzle</Title>
       <RotationControls>
         <Button 
           onClick={() => rotateShape(0)} 
